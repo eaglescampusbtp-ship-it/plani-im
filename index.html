@@ -574,7 +574,7 @@ function toastStay(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;cle
 function fail(e){console.warn(e);if(e&&e.code==="quota_exceeded")toast("Hapësira e ruajtjes është plot.");else toast("Ruajtja nuk u krye. Provo përsëri.")}
 
 /* ---------- Supabase (personal database) ---------- */
-const APP_V="2.0";
+const APP_V="2.1";
 const SB_URL="https://vkzqsniauvldefkxcoba.supabase.co";
 const SB_KEY="sb_publishable_R9oV0GHdHX5siAJkPyFI2w_tcviXc4B";
 const BUCKET="pi-files";
@@ -1503,9 +1503,10 @@ function openSheet({title,fields,values,pid,onSave,onDelete,extra}){
     const btn=$("#ssave");btn.disabled=true;btn.textContent="Po ruhet…";
     try{
       if(fields.some(fd=>fd.t==="files")){
-        const up=[];
-        for(const file of newFiles){const ext=(file.name.match(/\.([a-z0-9]+)$/i)||[])[1]||"";const guess={pdf:"application/pdf",txt:"text/plain",csv:"text/csv",md:"text/markdown",json:"application/json",png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",heic:"image/heic",webp:"image/webp",doc:"application/msword",docx:"application/vnd.openxmlformats-officedocument.wordprocessingml.document",xls:"application/vnd.ms-excel",xlsx:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",odt:"application/vnd.oasis.opendocument.text",ods:"application/vnd.oasis.opendocument.spreadsheet",dwg:"application/octet-stream"}[ext.toLowerCase()]||"application/octet-stream";const r=await ASSETS.upload(file,file.type?undefined:{type:guess});up.push({id:r.id,name:file.name,ct:r.contentType})}
+        const up=[],texts=[];
+        for(const file of newFiles){const ext=(file.name.match(/\.([a-z0-9]+)$/i)||[])[1]||"";const guess={pdf:"application/pdf",txt:"text/plain",csv:"text/csv",md:"text/markdown",json:"application/json",png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",heic:"image/heic",webp:"image/webp",doc:"application/msword",docx:"application/vnd.openxmlformats-officedocument.wordprocessingml.document",xls:"application/vnd.ms-excel",xlsx:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",odt:"application/vnd.oasis.opendocument.text",ods:"application/vnd.oasis.opendocument.spreadsheet",dwg:"application/octet-stream"}[ext.toLowerCase()]||"application/octet-stream";const r=await ASSETS.upload(file,file.type?undefined:{type:guess});up.push({id:r.id,name:file.name,ct:r.contentType});if(fileKind(r.contentType,file.name)==="pdf"){try{const t=await pdfText(file);if(t)texts.push(`[${file.name}]\n${t}`)}catch(_){}}}
         out.files=[...keptFiles,...up];
+        if(texts.length){out.extract=texts.join("\n\n").slice(0,15000);out.aiDone=false}
       }
       await onSave(out);
       if(ASSETS)for(const f of removed){try{await ASSETS.delete(f.id)}catch(_){}}
@@ -1632,6 +1633,14 @@ async function renderPdf(){
     pages.push({page,box,c,css,dpr,w,h,task:null,done:false});
     io.observe(box);
   }
+}
+async function pdfText(file){
+  const L=await getPdfjs();
+  const doc=await L.getDocument({data:new Uint8Array(await file.arrayBuffer()),isEvalSupported:false}).promise;
+  let out="";
+  for(let i=1;i<=Math.min(doc.numPages,15)&&out.length<15000;i++){const pg=await doc.getPage(i);const tc=await pg.getTextContent();out+=tc.items.map(x=>x.str).join(" ").replace(/\s+/g," ")+"\n"}
+  try{doc.destroy()}catch(_){}
+  return out.trim();
 }
 async function openViewer(id,name,ct){
   closeViewer();
