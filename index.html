@@ -1,36 +1,39 @@
-<!doctype html><html lang="sq"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Plani Im</title><meta name="robots" content="noindex,nofollow"><meta name="description" content="Plani Im – projektet, detyrat, dokumentet dhe paratë."><meta name="theme-color" content="#2349D8" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#111A32" media="(prefers-color-scheme: dark)"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Plani Im"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png" type="image/png"><link rel="apple-touch-icon" href="apple-touch-icon.png"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html lang="sq"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Plani Im</title><meta name="robots" content="noindex,nofollow"><meta name="description" content="Plani Im – projektet, detyrat, dokumentet dhe paratë."><meta name="theme-color" content="#0F2A47"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Plani Im"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png" type="image/png"><link rel="apple-touch-icon" href="apple-touch-icon.png"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
 /* Layout: client-space dashboard in a legaltech spirit. Calm white cards on a cool canvas, one strong blue, dossier-style status steppers, and charts that open a detail window when tapped. Mobile-first with a bottom nav. */
 :root{
-  --bg:#F3F6FC; --surface:#FFFFFF; --surface2:#EFF3FA; --ink:#0C1736; --ink2:#2B3659; --muted:#5B6787; --line:#E1E7F2; --line2:#C9D2E5;
-  --brand:#2349D8; --brand-hi:#1A39B3; --brand-soft:#E8EEFF; --onbrand:#FFFFFF;
-  --sun:#FFC23A; --sun-soft:#FFF4D8;
-  --ok:#0E8754; --ok-soft:#DFF4E9; --warn:#A35F00; --warn-soft:#FFF0D3; --bad:#C93434; --bad-soft:#FCE8E8;
-  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a;
-  --shade:rgba(12,23,54,.44);
-  --sh-sm:0 1px 2px rgba(12,23,54,.05),0 2px 8px rgba(12,23,54,.04);
-  --sh-lg:0 12px 40px rgba(12,23,54,.18);
-  --f-ui:"Plus Jakarta Sans","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --bg:#EDF0F3; --surface:#FFFFFF; --surface2:#F3F5F8; --ink:#0D1B2C; --ink2:#2C3E52; --muted:#5A7189; --line:#DDE3E9; --line2:#C3CDD8;
+  --brand:#1E4E8C; --brand-hi:#173E70; --brand-soft:#E3ECF7; --onbrand:#FFFFFF;
+  --sun:#F2B230; --sun-soft:#FDF1D6; --onsun:#1A1405;
+  --deck:#0F2A47; --deck2:#163759; --ondeck:#FFFFFF; --ondeck2:#B9C9DB; --grid:rgba(255,255,255,.055);
+  --ok:#1E8A5A; --ok-soft:#DFF2E8; --warn:#9A5B00; --warn-soft:#FCEFD6; --bad:#C8402E; --bad-soft:#FBE7E3;
+  --s1:#1E4E8C; --s2:#E0892B; --s3:#1E8A5A;
+  --shade:rgba(10,22,38,.5);
+  --sh-sm:0 1px 0 rgba(13,27,44,.04),0 1px 3px rgba(13,27,44,.06);
+  --sh-lg:0 18px 48px rgba(13,27,44,.22);
+  --f-ui:"Archivo","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
-  --r-lg:20px; --r-md:14px;
+  --r-lg:16px; --r-md:12px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#090F21; --surface:#111A32; --surface2:#18223F; --ink:#E8ECF8; --ink2:#C7CFE6; --muted:#97A3C4; --line:#222D4E; --line2:#34416C;
-  --brand:#7D98FF; --brand-hi:#9DB1FF; --brand-soft:#1B2753; --onbrand:#08102A;
-  --sun:#FFD15C; --sun-soft:#3A2F12;
-  --ok:#3FCB8E; --ok-soft:#11301F; --warn:#F2B347; --warn-soft:#3A2A0E; --bad:#F27676; --bad-soft:#3F1A1D;
-  --s1:#3987e5; --s2:#d95926; --s3:#199e70;
-  --shade:rgba(0,0,0,.62); --sh-sm:0 1px 2px rgba(0,0,0,.3); --sh-lg:0 12px 40px rgba(0,0,0,.5); color-scheme:dark}}
+  --bg:#0A1626; --surface:#0F1F33; --surface2:#15283F; --ink:#E7EDF4; --ink2:#C4D0DD; --muted:#8FA3B9; --line:#1E3350; --line2:#2C4668;
+  --brand:#7FB0F0; --brand-hi:#A3C7F5; --brand-soft:#16304F; --onbrand:#07121F;
+  --sun:#F5BE45; --sun-soft:#3A2E10; --onsun:#1A1405;
+  --deck:#10304F; --deck2:#17406A; --ondeck:#FFFFFF; --ondeck2:#AFC3D9; --grid:rgba(255,255,255,.05);
+  --ok:#45C489; --ok-soft:#10301F; --warn:#F2B347; --warn-soft:#3A2A0E; --bad:#F2806E; --bad-soft:#3F1D19;
+  --s1:#7FB0F0; --s2:#F0A050; --s3:#45C489;
+  --shade:rgba(0,0,0,.62); --sh-sm:0 1px 2px rgba(0,0,0,.35); --sh-lg:0 18px 48px rgba(0,0,0,.55); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#090F21; --surface:#111A32; --surface2:#18223F; --ink:#E8ECF8; --ink2:#C7CFE6; --muted:#97A3C4; --line:#222D4E; --line2:#34416C;
-  --brand:#7D98FF; --brand-hi:#9DB1FF; --brand-soft:#1B2753; --onbrand:#08102A;
-  --sun:#FFD15C; --sun-soft:#3A2F12;
-  --ok:#3FCB8E; --ok-soft:#11301F; --warn:#F2B347; --warn-soft:#3A2A0E; --bad:#F27676; --bad-soft:#3F1A1D;
-  --s1:#3987e5; --s2:#d95926; --s3:#199e70;
-  --shade:rgba(0,0,0,.62); --sh-sm:0 1px 2px rgba(0,0,0,.3); --sh-lg:0 12px 40px rgba(0,0,0,.5); color-scheme:dark}
+  --bg:#0A1626; --surface:#0F1F33; --surface2:#15283F; --ink:#E7EDF4; --ink2:#C4D0DD; --muted:#8FA3B9; --line:#1E3350; --line2:#2C4668;
+  --brand:#7FB0F0; --brand-hi:#A3C7F5; --brand-soft:#16304F; --onbrand:#07121F;
+  --sun:#F5BE45; --sun-soft:#3A2E10; --onsun:#1A1405;
+  --deck:#10304F; --deck2:#17406A; --ondeck:#FFFFFF; --ondeck2:#AFC3D9; --grid:rgba(255,255,255,.05);
+  --ok:#45C489; --ok-soft:#10301F; --warn:#F2B347; --warn-soft:#3A2A0E; --bad:#F2806E; --bad-soft:#3F1D19;
+  --s1:#7FB0F0; --s2:#F0A050; --s3:#45C489;
+  --shade:rgba(0,0,0,.62); --sh-sm:0 1px 2px rgba(0,0,0,.35); --sh-lg:0 18px 48px rgba(0,0,0,.55); color-scheme:dark}
 
 *{box-sizing:border-box}
 html,body{background:var(--bg);color:var(--ink)}
@@ -395,6 +398,62 @@ td.r,th.r{text-align:right}
 .inst .t{flex:1;min-width:0;font-weight:700;font-size:14px}
 .inst .t span{display:block;font-weight:600;font-size:12.5px;color:var(--muted)}
 @media (prefers-reduced-motion:no-preference){.win.anim{animation:up .22s cubic-bezier(.2,.8,.3,1)}@keyframes up{from{transform:translateY(24px);opacity:.5}to{transform:none;opacity:1}}}
+
+/* ===== Blueprint & signal: premium skin ===== */
+body{font-family:var(--f-ui);font-stretch:100%}
+h1,h2,.logo,.pc-name,.w-title,.kpi .v,.gstat .v,.hstat b,.amt,.pc-v{font-stretch:112%}
+h1{font-weight:750;letter-spacing:-.02em}
+h2{font-weight:700;letter-spacing:-.01em}
+.top{background:var(--deck);border-bottom:1px solid rgba(255,255,255,.08)}
+body::before{background:var(--deck)}
+.logo{color:var(--ondeck);font-weight:750;letter-spacing:-.01em}
+.logo-m{background:var(--sun);color:var(--onsun);border-radius:9px}
+.logo-m::after{display:none}
+.tnav a{color:var(--ondeck2)}
+.tnav a:hover{background:rgba(255,255,255,.08);color:var(--ondeck)}
+.tnav a.on{color:var(--deck);background:var(--sun)}
+.today{color:var(--ondeck2)}
+.iconbtn{background:rgba(255,255,255,.08);color:var(--ondeck)}
+.iconbtn:hover{background:rgba(255,255,255,.16);color:var(--ondeck)}
+.hero{background-color:var(--deck);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px;background-position:-1px -1px;border-radius:22px;color:var(--ondeck);position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:repeating-linear-gradient(135deg,var(--sun) 0 14px,var(--deck) 14px 28px);opacity:.9}
+.hero h1{color:var(--ondeck)}
+.hero .date,.hero .lede{color:var(--ondeck2)}
+.hstat{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:var(--ondeck2);border-radius:10px}
+.hstat b{color:var(--ondeck)}
+.hstat b.bad{color:#FF9A88}
+.hero .ha-w{fill:transparent;stroke:rgba(255,255,255,.85)}
+.hero .ha-r{fill:var(--sun);stroke:rgba(255,255,255,.85)}
+.hero .ha-l{stroke:rgba(255,255,255,.85)}
+.hero .ha-d{stroke:rgba(255,255,255,.25)}
+.hero .ha-f{fill:rgba(242,178,48,.18);stroke:rgba(255,255,255,.7)}
+.hero .btn.pri{background:var(--sun);border-color:var(--sun);color:var(--onsun)}
+.card,.pcard,.list,.kpi{border-radius:var(--r-lg)}
+.card{box-shadow:var(--sh-sm)}
+.pcard{position:relative;overflow:hidden}
+.pcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--line2)}
+.pcard:hover{border-color:var(--brand)}
+.pcard:hover::before{background:var(--sun)}
+.pc-name{font-weight:750}
+.seg{border-radius:12px}
+.seg button[aria-selected="true"]{background:var(--deck);color:var(--ondeck)}
+.bnav a.on{color:var(--ink)}
+.bnav a.on .bi{background:var(--sun);color:var(--onsun)}
+.fab{background:var(--sun);color:var(--onsun);box-shadow:0 10px 28px rgba(242,178,48,.35),0 2px 6px rgba(13,27,44,.2)}
+.btn.pri{background:var(--deck);border-color:var(--deck)}
+.btn.pri:hover{background:var(--deck2)}
+.pg-bar{background:var(--sun)}
+.pg-bar.work{background:var(--ok)}
+.mbar i,.hb-bar{background:var(--brand)}
+.check.on{background:var(--ok);border-color:var(--ok)}
+.noauth{background-color:var(--deck);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px}
+.noauth .auth-card{border:0;box-shadow:var(--sh-lg)}
+.auth-card .logo{color:var(--ink)}
+.noauth .auth-card .btn.pri{background:var(--sun);border-color:var(--sun);color:var(--onsun)}
+.inst{border-left:3px solid var(--sun)}
+.vw-top{background:var(--deck);border-bottom:0}
+.vw-top .nm{color:var(--ondeck)}
+.vw-btn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14);color:var(--ondeck)}
 </style>
 
 <header class="top"><div class="top-in">
@@ -515,7 +574,7 @@ function toastStay(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;cle
 function fail(e){console.warn(e);if(e&&e.code==="quota_exceeded")toast("Hapësira e ruajtjes është plot.");else toast("Ruajtja nuk u krye. Provo përsëri.")}
 
 /* ---------- Supabase (personal database) ---------- */
-const APP_V="1.1";
+const APP_V="2.0";
 const SB_URL="https://vkzqsniauvldefkxcoba.supabase.co";
 const SB_KEY="sb_publishable_R9oV0GHdHX5siAJkPyFI2w_tcviXc4B";
 const BUCKET="pi-files";

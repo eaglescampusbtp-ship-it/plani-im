@@ -1,5 +1,5 @@
 /* Plani Im – service worker: app shell offline, data always live from the database */
-const CACHE = "plani-im-v2";
+const CACHE = "plani-im-v3";
 const SHELL = [
   "./", "./index.html", "./manifest.webmanifest",
   "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png", "./apple-touch-icon.png",
