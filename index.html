@@ -94,6 +94,12 @@ h2{font-size:17px;font-weight:800;letter-spacing:-.015em;margin:0;line-height:1.
 .empty{padding:22px 16px;color:var(--muted);text-align:center;background:var(--surface);border:1px dashed var(--line2);border-radius:var(--r-md);font-size:14px}
 .card .empty{border-radius:12px}
 .note{font-size:13.5px;color:var(--ink2);background:var(--surface2);border-radius:12px;padding:11px 13px}
+.ai{border-radius:12px;padding:12px 13px;font-size:13.5px;line-height:1.45;border:1px solid var(--line)}
+.ai.wait{background:var(--sun-soft);color:var(--ink);border-color:transparent}
+.ai.done{background:var(--ok-soft);color:var(--ink);border-color:transparent}
+.ai b{display:block;font-size:13px;margin-bottom:4px}
+.ai ul{margin:8px 0 0;padding-left:18px}.ai li{margin:3px 0}
+.ai .btn{margin-top:10px}
 .note.warn{background:var(--warn-soft);color:var(--ink)}
 .note.brand{background:var(--brand-soft);color:var(--ink)}
 .cap{font-size:12.5px;color:var(--muted)}
@@ -574,7 +580,7 @@ function toastStay(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;cle
 function fail(e){console.warn(e);if(e&&e.code==="quota_exceeded")toast("Hapësira e ruajtjes është plot.");else toast("Ruajtja nuk u krye. Provo përsëri.")}
 
 /* ---------- Supabase (personal database) ---------- */
-const APP_V="2.1";
+const APP_V="2.2";
 const SB_URL="https://vkzqsniauvldefkxcoba.supabase.co";
 const SB_KEY="sb_publishable_R9oV0GHdHX5siAJkPyFI2w_tcviXc4B";
 const BUCKET="pi-files";
@@ -1370,7 +1376,15 @@ function fileChip(f,extra){
 }
 function filesBlock(x){
   if(!x.files||!x.files.length)return"";
-  return`<div class="w-sec"><span class="kick">Dokumente · prek për ta hapur</span><div class="files">${x.files.map(f=>fileChip(f)).join("")}</div></div>`;
+  return`<div class="w-sec"><span class="kick">Dokumente · prek për ta hapur</span><div class="files">${x.files.map(f=>fileChip(f)).join("")}</div></div>`+aiBlock(x);
+}
+function aiBlock(x){
+  if(x.aiDone&&(x.aiSummary||(x.aiChanges||[]).length)){
+    const ch=(x.aiChanges||[]).map(c=>`<li>${esc(typeof c==="string"?c:c.t||"")}</li>`).join("");
+    return`<div class="w-sec"><div class="ai done"><b>✅ Lexuar nga Claude${x.aiAt?" · "+fdate(String(x.aiAt).slice(0,10)):""}</b>${x.aiSummary?esc(x.aiSummary):""}${ch?`<ul>${ch}</ul>`:""}${x.extract?`<button type="button" class="btn" data-act="reread" data-id="${esc(x.id)}">${ico("open")}Lexoje përsëri</button>`:""}</div></div>`;
+  }
+  if(x.extract&&!x.aiDone)return`<div class="w-sec"><div class="ai wait"><b>⏳ Në pritje të Claude</b>Claude do ta lexojë brenda 1 ore dhe do përditësojë projektin (detyra, çmime, devis, kontakte, afate).</div></div>`;
+  return"";
 }
 const editBtn=id=>`<button type="button" class="btn grow" data-act="edit" data-id="${esc(id)}">${ico("edit")}Ndrysho</button>`;
 function head(x,icTone,sub){return`<div class="w-head"><span class="ic ${icTone||""}">${ico(TYPE_IC[x.type]||"note")}</span><div style="min-width:0"><div class="w-title">${esc(x.title)}</div>${sub?`<div class="w-sub">${sub}</div>`:""}</div></div>`}
@@ -1504,7 +1518,8 @@ function openSheet({title,fields,values,pid,onSave,onDelete,extra}){
     try{
       if(fields.some(fd=>fd.t==="files")){
         const up=[],texts=[];
-        for(const file of newFiles){const ext=(file.name.match(/\.([a-z0-9]+)$/i)||[])[1]||"";const guess={pdf:"application/pdf",txt:"text/plain",csv:"text/csv",md:"text/markdown",json:"application/json",png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",heic:"image/heic",webp:"image/webp",doc:"application/msword",docx:"application/vnd.openxmlformats-officedocument.wordprocessingml.document",xls:"application/vnd.ms-excel",xlsx:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",odt:"application/vnd.oasis.opendocument.text",ods:"application/vnd.oasis.opendocument.spreadsheet",dwg:"application/octet-stream"}[ext.toLowerCase()]||"application/octet-stream";const r=await ASSETS.upload(file,file.type?undefined:{type:guess});up.push({id:r.id,name:file.name,ct:r.contentType});if(fileKind(r.contentType,file.name)==="pdf"){try{const t=await pdfText(file);if(t)texts.push(`[${file.name}]\n${t}`)}catch(_){}}}
+        for(const file of newFiles){const ext=(file.name.match(/\.([a-z0-9]+)$/i)||[])[1]||"";const guess={pdf:"application/pdf",txt:"text/plain",csv:"text/csv",md:"text/markdown",json:"application/json",png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",heic:"image/heic",webp:"image/webp",doc:"application/msword",docx:"application/vnd.openxmlformats-officedocument.wordprocessingml.document",xls:"application/vnd.ms-excel",xlsx:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",odt:"application/vnd.oasis.opendocument.text",ods:"application/vnd.oasis.opendocument.spreadsheet",dwg:"application/octet-stream"}[ext.toLowerCase()]||"application/octet-stream";const r=await ASSETS.upload(file,file.type?undefined:{type:guess});up.push({id:r.id,name:file.name,ct:r.contentType});const kind=fileKind(r.contentType,file.name),prog=m=>{btn.textContent=m};let t="";try{if(kind==="pdf")t=await pdfText(file,prog);else if(kind==="img")t=await imgText(file,prog);else if(kind==="txt")t=(await file.text()).slice(0,15000)}catch(_){}if(t&&t.replace(/\s/g,"").length>15)texts.push(`[${file.name}]\n${t}`);btn.textContent="Po ruhet…"}
+        await ocrStop();
         out.files=[...keptFiles,...up];
         if(texts.length){out.extract=texts.join("\n\n").slice(0,15000);out.aiDone=false}
       }
@@ -1634,13 +1649,42 @@ async function renderPdf(){
     io.observe(box);
   }
 }
-async function pdfText(file){
+async function pdfText(file,prog){
   const L=await getPdfjs();
   const doc=await L.getDocument({data:new Uint8Array(await file.arrayBuffer()),isEvalSupported:false}).promise;
-  let out="";
-  for(let i=1;i<=Math.min(doc.numPages,15)&&out.length<15000;i++){const pg=await doc.getPage(i);const tc=await pg.getTextContent();out+=tc.items.map(x=>x.str).join(" ").replace(/\s+/g," ")+"\n"}
+  let out="",ocrN=0;const n=Math.min(doc.numPages,15);
+  for(let i=1;i<=n&&out.length<15000;i++){
+    const pg=await doc.getPage(i);const tc=await pg.getTextContent();
+    let t=tc.items.map(x=>x.str).join(" ").replace(/\s+/g," ").trim();
+    if(t.length<40&&ocrN<6){ // scanned page: read it with OCR
+      ocrN++;prog&&prog(`Po lexohet faqja ${i} nga ${n}…`);
+      try{const v0=pg.getViewport({scale:1});const sc=Math.min(2.5,2400/Math.max(v0.width,v0.height));const v=pg.getViewport({scale:sc});
+        const c=document.createElement("canvas");c.width=Math.ceil(v.width);c.height=Math.ceil(v.height);const ctx=c.getContext("2d");ctx.fillStyle="#fff";ctx.fillRect(0,0,c.width,c.height);
+        await pg.render({canvasContext:ctx,viewport:v}).promise;const o=await ocrCanvas(c);c.width=c.height=0;if(o)t=o}catch(_){}
+    }
+    out+=t+"\n";
+  }
   try{doc.destroy()}catch(_){}
   return out.trim();
+}
+const OCR="vendor/ocr/";let ocrLoad=null;
+function getOcr(){
+  if(!ocrLoad)ocrLoad=(async()=>{
+    await loadScript(OCR+"tesseract.min.js");
+    const base=new URL(OCR,location.href).href;
+    return await window.Tesseract.createWorker("fra",1,{workerPath:base+"worker.min.js",corePath:base,langPath:base});
+  })().catch(e=>{ocrLoad=null;throw e});
+  return ocrLoad;
+}
+async function ocrStop(){if(!ocrLoad)return;try{(await ocrLoad).terminate()}catch(_){}ocrLoad=null}
+async function ocrCanvas(c){const w=await getOcr();const r=await w.recognize(c);return String(r.data.text||"").replace(/[ \t]+/g," ").replace(/\n{3,}/g,"\n\n").trim()}
+async function imgText(file,prog){
+  prog&&prog("Po lexohet fotoja…");
+  let bmp;try{bmp=await createImageBitmap(file,{imageOrientation:"from-image"})}catch(_){bmp=await new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=URL.createObjectURL(file)})}
+  const W=bmp.width,H=bmp.height,sc=Math.min(1,2400/Math.max(W,H));
+  const c=document.createElement("canvas");c.width=Math.round(W*sc);c.height=Math.round(H*sc);c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);
+  try{bmp.close&&bmp.close()}catch(_){}
+  const t=await ocrCanvas(c);c.width=c.height=0;return t.slice(0,15000);
 }
 async function openViewer(id,name,ct){
   closeViewer();
@@ -1708,6 +1752,7 @@ document.addEventListener("click",async e=>{
   if(a==="lot"){openWin(specLot(el.dataset.id));return}
   if(a==="sup"){openWin(specSup(el.dataset.pid,el.dataset.id));return}
   if(a==="setst"){const it=S.items.get(el.dataset.id);if(!it||it.status===el.dataset.v)return;try{await DB.collection("items").doc(it.id).update({status:el.dataset.v,updatedAt:new Date().toISOString()});toast("Statusi: "+el.dataset.v)}catch(err){fail(err)}return}
+  if(a==="reread"){const it=S.items.get(el.dataset.id);if(!it)return;try{await DB.collection("items").doc(it.id).update({aiDone:false,updatedAt:new Date().toISOString()});toast("Claude do ta lexojë përsëri brenda 1 ore")}catch(err){fail(err)}return}
   if(a==="paid"){const it=S.items.get(el.dataset.id);if(!it)return;try{await DB.collection("items").doc(it.id).update({paid:!it.paid,updatedAt:new Date().toISOString()})}catch(err){fail(err)}return}
   if(a==="edit"){const it=S.items.get(el.dataset.id);if(it)formItem({type:it.type,id:it.id,pid:it.pid});return}
   if(a==="add"){formItem({type:el.dataset.type,pid:el.dataset.pid,lot:el.dataset.lot});return}

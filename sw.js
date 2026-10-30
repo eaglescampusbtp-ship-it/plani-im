@@ -1,5 +1,5 @@
 /* Plani Im – service worker: app shell offline, data always live from the database */
-const CACHE = "plani-im-v4";
+const CACHE = "plani-im-v5";
 const SHELL = [
   "./", "./index.html", "./manifest.webmanifest",
   "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png", "./apple-touch-icon.png",
@@ -18,7 +18,7 @@ self.addEventListener("fetch", e => {
   if (url.hostname.endsWith("supabase.co") || url.hostname.endsWith("supabase.in")) return; // never cache personal data
   if (url.origin === self.location.origin) {
     const isPage = req.mode === "navigate";
-    const heavy = url.pathname.includes("/vendor/pdfjs/");
+    const heavy = (url.pathname.includes("/vendor/pdfjs/")||url.pathname.includes("/vendor/ocr/"));
     if (heavy) { // big library: cache on first use
       e.respondWith(caches.match(req).then(m => m || fetch(req).then(r => { const c = r.clone(); caches.open(CACHE).then(x => x.put(req, c)); return r; })));
       return;
