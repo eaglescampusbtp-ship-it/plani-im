@@ -515,7 +515,7 @@ function toastStay(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;cle
 function fail(e){console.warn(e);if(e&&e.code==="quota_exceeded")toast("Hapësira e ruajtjes është plot.");else toast("Ruajtja nuk u krye. Provo përsëri.")}
 
 /* ---------- Supabase (personal database) ---------- */
-const APP_V="1.0";
+const APP_V="1.1";
 const SB_URL="https://vkzqsniauvldefkxcoba.supabase.co";
 const SB_KEY="sb_publishable_R9oV0GHdHX5siAJkPyFI2w_tcviXc4B";
 const BUCKET="pi-files";
@@ -727,6 +727,7 @@ function buildSettings(){
     <div class="list">
       <div class="row" data-act="import" role="button" tabindex="0"><span class="ic">${ico("up")}</span><div><div class="t">Importo të dhënat</div><div class="m">Nga skedari .json që të dërgoi Claude</div></div></div>
       <div class="row" data-act="export" role="button" tabindex="0"><span class="ic">${ico("down")}</span><div><div class="t">Shkarko kopje rezervë</div><div class="m">Projektet, detyrat dhe dokumentet në një skedar</div></div></div>
+      <div class="row" data-act="chpw" role="button" tabindex="0"><span class="ic">${ico("edit")}</span><div><div class="t">Ndrysho fjalëkalimin</div><div class="m">Vendos një fjalëkalim të ri</div></div></div>
       <div class="row" data-act="logout" role="button" tabindex="0"><span class="ic bad">${ico("logout")}</span><div><div class="t">Dil nga llogaria</div></div></div>
     </div>
     <div class="cap">Plani Im · versioni ${APP_V}</div>`;
@@ -1412,6 +1413,7 @@ function openSheet({title,fields,values,pid,onSave,onDelete,extra}){
       case"bool":return`<div class="f full"><label class="switch"><input type="checkbox" id="${id}" name="${fd.k}" ${val?"checked":""}> ${esc(fd.label)}</label></div>`;
       case"date":return wrap(`<input type="date" id="${id}" name="${fd.k}" value="${esc(val||"")}">`);
       case"time":return wrap(`<input type="time" id="${id}" name="${fd.k}" value="${esc(val||"")}">`);
+      case"pw":return wrap(`<input type="password" id="${id}" name="${fd.k}" autocomplete="new-password" ${fd.req?"required":""}>`);
       case"url":return wrap(`<input type="url" inputmode="url" id="${id}" name="${fd.k}" value="${esc(val||"")}" placeholder="https://…">${isUrl(val)?`<a href="${esc(val)}" target="_blank" rel="noopener" style="font-size:13px;font-weight:700">Hap faqen e produktit ↗</a>`:""}`);
       case"num":case"eur":return wrap(`<input type="text" inputmode="decimal" id="${id}" name="${fd.k}" value="${val===undefined||val===null||val===""?"":esc(val)}" placeholder="${fd.t==="eur"?"0 €":"0"}">`);
       case"files":return wrap(`<div class="files" id="fl"></div>${ASSETS?`<input type="file" id="${id}" accept="image/*,application/pdf,.txt,.csv,.md,.json,text/plain,text/csv,text/markdown,application/json,.doc,.docx,.xls,.xlsx,.odt,.ods,.dwg" multiple>`:`<div style="font-size:13px;color:var(--muted)">Ngarkimi i skedarëve punon kur je i lidhur në llogari.</div>`}`);
@@ -1453,6 +1455,7 @@ function openSheet({title,fields,values,pid,onSave,onDelete,extra}){
       btn.disabled=false;btn.textContent="Ruaj";
       if(err&&err.code==="too_large")toast("Skedari është shumë i madh (maks. 20 MB).");
       else if(err&&err.code==="unsupported_type")toast("Ky skedar nuk u ngarkua. Provo përsëri.");
+      else if(err&&err.code==="msg")toast(err.message);
       else fail(err);
     }
   });
@@ -1625,6 +1628,13 @@ document.addEventListener("click",async e=>{
   if(a==="logout"){W.stack=[];drawWin();try{await SB.auth.signOut()}catch(_){S.mode="login";render()}return}
   if(a==="import"){W.stack=[];drawWin();pickImport();return}
   if(a==="export"){runExport();return}
+  if(a==="chpw"){W.stack=[];drawWin();openSheet({title:"Fjalëkalimi i ri",values:{},fields:[F("p1","Fjalëkalimi i ri (të paktën 8 shenja)","pw",{req:1,full:1}),F("p2","Përsërite","pw",{req:1,full:1})],onSave:async out=>{
+    const m=t=>{const e=new Error(t);e.code="msg";return e};
+    if(String(out.p1).length<8)throw m("Fjalëkalimi duhet të ketë të paktën 8 shenja.");
+    if(out.p1!==out.p2)throw m("Dy fjalëkalimet nuk janë njësoj.");
+    const r=await SB.auth.updateUser({password:out.p1});
+    if(r.error)throw m("Nuk u ndryshua: "+(r.error.message||""));
+  }});return}
   if(S.mode!=="ready")return;
   if(a==="open"){const it=S.items.get(el.dataset.id);if(it)openWin(it.type==="lot"?specLot(it.id):specItem(it.id));return}
   if(a==="lot"){openWin(specLot(el.dataset.id));return}
