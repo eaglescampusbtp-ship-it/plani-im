@@ -600,6 +600,7 @@ const TVA=1.2;
 
 /* ---------- icons ---------- */
 const IC={
+  bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
   home:'<path d="M3.5 11 12 4l8.5 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/>',
   house:'<path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M5 13h14"/><path d="M10 21v-4h4v4"/>',
   helmet:'<path d="M3 17h18"/><path d="M5 17a7 7 0 0 1 14 0"/><path d="M10 10V6h4v4"/><path d="M4 20h16"/>',
@@ -643,7 +644,7 @@ const TYPES={
   devis:{one:"Devis",many:"Devis",fields:[F("title","Për çfarë","text",{req:1,full:1}),F("supplier","Nga kush","text"),F("lotId","Loti","lot"),F("amount","Shuma (€ TTC)","eur"),F("date","Data","date"),F("status","Statusi","sel",{opts:DEVIS_ST}),F("files","Dokumente (foto / PDF)","files",{full:1}),F("notes","Shënime","area",{full:1})]},
   facture:{one:"Faturë",many:"Fatura",fields:[F("title","Nr. i faturës / përshkrimi","text",{req:1,full:1}),F("supplier","Furnizuesi","text"),F("lotId","Loti","lot"),F("amount","Shuma (€ TTC)","eur"),F("date","Data","date"),F("paid","E paguar","bool"),F("files","Fatura (foto / PDF)","files",{full:1}),F("notes","Shënime","area",{full:1})]},
   achat:{one:"Blerje",many:"Blerje",fields:[F("title","Materiali","text",{req:1,full:1}),F("lotId","Loti","lot"),F("status","Statusi","sel",{opts:ACHAT_ST}),F("qty","Sasia","num"),F("unit","Njësia","sel",{opts:UNITS}),F("unitPrice","Çmimi për njësi (€ HT)","eur"),F("supplier","Furnizuesi","text"),F("ref","Referenca (EAN / kodi i dyqanit)","text"),F("link","Linku i produktit","url",{full:1}),F("date","Data e porosisë","date"),F("poseDays","Koha e montimit (ditë)","num"),F("files","Fatura / foto","files",{full:1}),F("notes","Shënime","area",{full:1})]},
-  tache:{one:"Detyrë",many:"Detyra",fields:[F("title","Detyra","text",{req:1,full:1}),F("due","Afati","date"),F("prio","Prioriteti","sel",{opts:PRIO}),F("done","E kryer","bool"),F("notes","Shënime","area",{full:1})]},
+  tache:{one:"Detyrë",many:"Detyra",fields:[F("title","Detyra","text",{req:1,full:1}),F("due","Afati","date"),F("time","Ora (njoftim 10 min para)","time"),F("prio","Prioriteti","sel",{opts:PRIO}),F("done","E kryer","bool"),F("notes","Shënime","area",{full:1})]},
   contact:{one:"Kontakt",many:"Kontakte",fields:[F("title","Emri","text",{req:1}),F("role","Roli","text"),F("phone","Telefoni","text"),F("email","Email","text"),F("notes","Shënime","area",{full:1})]},
   info:{one:"Info",many:"Info",fields:[F("title","Emërtimi","text",{req:1}),F("value","Vlera","area",{full:1})]},
   demande:{one:"Kërkesë",many:"Kërkesa",fields:[F("title","Materiali","text",{req:1,full:1}),F("qty","Sasia","num"),F("unit","Njësia","sel",{opts:UNITS}),F("urgency","Urgjenca","sel",{opts:URG}),F("status","Statusi","sel",{opts:DEM_ST}),F("date","Data e kërkesës","date"),F("notes","Shënime (për kë, ku, pse)","area",{full:1})]},
@@ -670,7 +671,7 @@ function toastStay(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;cle
 function fail(e){console.warn(e);if(e&&e.code==="quota_exceeded")toast("Hapësira e ruajtjes është plot.");else toast("Ruajtja nuk u krye. Provo përsëri.")}
 
 /* ---------- Supabase (personal database) ---------- */
-const APP_V="3.0";
+const APP_V="3.2";
 const SB_URL="https://vkzqsniauvldefkxcoba.supabase.co";
 const SB_KEY="sb_publishable_R9oV0GHdHX5siAJkPyFI2w_tcviXc4B";
 const BUCKET="pi-files";
@@ -782,7 +783,7 @@ function startData(user){
   if(DB&&S.user&&user&&S.user.id===user.id)return;
   S.user=user;S.loaded={p:0,i:0,f:0};S.mode="loading";render();
   DB=makeDb(SB);ASSETS=makeAssets(SB);
-  const done=()=>{if(S.loaded.p&&S.loaded.i&&S.loaded.f){S.mode="ready"}render();drawWin()};
+  const done=()=>{if(S.loaded.p&&S.loaded.i&&S.loaded.f){S.mode="ready"}render();drawWin();if(S.mode==="ready"){deepLink();if(!PUSH.checked){PUSH.checked=1;pushRefresh().then(()=>{render();if(W.stack.length)drawWin()})}}};
   DB.collection("projects").onSnapshot(s=>{S.projects=new Map(s.docs.map(d=>[d.id,Object.assign({id:d.id},d.data())]));S.loaded.p=1;done()},e=>{S.mode="nodb";render();console.warn(e)});
   DB.collection("items").onSnapshot(s=>{S.items=new Map(s.docs.map(d=>[d.id,Object.assign({id:d.id},d.data())]));S.loaded.i=1;done()},e=>console.warn(e));
   DB.doc("finance/main").onSnapshot(s=>{S.finance=s.exists?s.data():null;S.loaded.f=1;done()},e=>{S.loaded.f=1;done();console.warn(e)});
@@ -886,6 +887,7 @@ function buildSettings(){
     <div class="list">
       <div class="row" data-act="import" role="button" tabindex="0"><span class="ic">${ico("up")}</span><div><div class="t">Importo të dhënat</div><div class="m">Nga skedari .json që të dërgoi Claude</div></div></div>
       <div class="row" data-act="export" role="button" tabindex="0"><span class="ic">${ico("down")}</span><div><div class="t">Shkarko kopje rezervë</div><div class="m">Projektet, detyrat dhe dokumentet në një skedar</div></div></div>
+      ${pushRow()}
       <div class="row" data-act="xlsx" role="button" tabindex="0"><span class="ic ok">${ico("down")}</span><div><div class="t">Shkarko në Excel</div><div class="m">Të gjitha të dhënat në një skedar Excel</div></div></div>
       <div class="row" data-act="chpw" role="button" tabindex="0"><span class="ic">${ico("edit")}</span><div><div class="t">Ndrysho fjalëkalimin</div><div class="m">Vendos një fjalëkalim të ri</div></div></div>
       <div class="row" data-act="logout" role="button" tabindex="0"><span class="ic bad">${ico("logout")}</span><div><div class="t">Dil nga llogaria</div></div></div>
@@ -1053,10 +1055,11 @@ function route(){
   if(!h||h==="home")return{v:"home"};
   if(h==="financat")return{v:"fin"};
   if(h==="kantieret")return{v:"sites"};
+  if(h.startsWith("i:"))return{v:"home"};
   const [pid,tab,lot]=h.split("-");
   return{v:"proj",pid,tab:tab||"overview",lot};
 }
-window.addEventListener("hashchange",()=>{W.stack=[];drawWin();render();window.scrollTo(0,0)});
+window.addEventListener("hashchange",()=>{W.stack=[];drawWin();render();window.scrollTo(0,0);deepLink()});
 
 /* ---------- shell ---------- */
 function navLinks(){
@@ -1085,7 +1088,7 @@ function render(){USERDIRTY=true;
   if(S.mode==="nodb"){app.innerHTML=`<div class="hero"><div><h1>Plani Im</h1><p class="lede" style="margin-top:8px">Lidhja me bazën e të dhënave nuk funksionoi. Kontrollo internetin dhe rifresko faqen.</p></div></div>`;fab();return}
   if(!S.projects.size&&!S.items.size){app.innerHTML=vWelcome();fab();return}
   const r=route();
-  if(r.v==="home")app.innerHTML=installBanner()+vHome();
+  if(r.v==="home")app.innerHTML=installBanner()+pushBanner()+vHome();
   else if(r.v==="fin")app.innerHTML=vFin();
   else if(r.v==="sites")app.innerHTML=vSites();
   else{
@@ -1121,7 +1124,7 @@ function onFab(){
 /* ---------- rows ---------- */
 function rowTask(x,showP){
   const late=x.due&&!x.done&&x.due<todayISO();
-  const meta=[showP&&x.pname?esc(x.pname):"",x.due?`<span class="${late?"late":""}">${late?"Vonesë · ":""}${fdate(x.due)}</span>`:"",x.notes?esc(String(x.notes).slice(0,70)):""].filter(Boolean).join(" · ");
+  const meta=[showP&&x.pname?esc(x.pname):"",x.due?`<span class="${late?"late":""}">${late?"Vonesë · ":""}${fdate(x.due)}${x.time?" · "+esc(x.time):""}</span>`:"",x.notes?esc(String(x.notes).slice(0,70)):""].filter(Boolean).join(" · ");
   return`<div class="row ${x.done?"done":""}" data-act="open" data-id="${esc(x.id)}" role="button" tabindex="0"><button type="button" class="check ${x.done?"on":""}" data-act="toggle" data-id="${esc(x.id)}" aria-label="${x.done?"Rihap detyrën":"Shëno si të kryer"}"></button><div><div class="t">${esc(x.title)}</div>${meta?`<div class="m">${meta}</div>`:""}</div><div class="e">${Array.isArray(x.checklist)&&x.checklist.length?`<span class="pcl">${x.checklist.filter(c=>c&&c.done).length}/${x.checklist.length}</span>`:""}${x.prio==="Lartë"&&!x.done?pill("Lartë"):""}</div></div>`;
 }
 function R(x,{ic,t,m,m2,e,act}){
@@ -1491,8 +1494,8 @@ function buildItem(id){
     foot=`<button type="button" class="btn ${x.paid?"":"pri"} grow" data-act="paid" data-id="${esc(x.id)}">${ico("check")}${x.paid?"Shëno si pa paguar":"Shëno si të paguar"}</button>`+editBtn(x.id);
   }else if(x.type==="tache"){
     const late=x.due&&!x.done&&x.due<todayISO();
-    body=head(x,x.done?"ok":(late?"bad":""),[x.done?pill("Përfunduar"):"",x.prio?pill(x.prio):"",x.due?`<span class="${late?"late":""}">Afati ${fdate(x.due)}</span>`:""].filter(Boolean).join(" "))
-      +facts([fact("Projekti",p?esc(p.name):""),fact("Afati",fdate(x.due)),fact("Prioriteti",esc(x.prio))])+notesBlock(x)+checklistBlock(x);
+    body=head(x,x.done?"ok":(late?"bad":""),[x.done?pill("Përfunduar"):"",x.prio?pill(x.prio):"",x.due?`<span class="${late?"late":""}">Afati ${fdate(x.due)}${x.time?" · "+esc(x.time):""}</span>`:""].filter(Boolean).join(" "))
+      +facts([fact("Projekti",p?esc(p.name):""),fact("Afati",fdate(x.due)),fact("Ora",esc(x.time||"")),fact("Prioriteti",esc(x.prio))])+notesBlock(x)+checklistBlock(x);
     foot=`<button type="button" class="btn ${x.done?"":"pri"} grow" data-act="toggle" data-id="${esc(x.id)}">${ico("check")}${x.done?"Rihap":"Shëno si të kryer"}</button>`+(x.due&&!x.done?`<button type="button" class="btn grow" data-act="tics" data-id="${esc(x.id)}">${ico("cal")}Në kalendar</button>`:"")+editBtn(x.id);
   }else if(x.type==="contact"){
     body=head(x,"",esc(x.role||""))+facts([fact("Roli",esc(x.role)),fact("Telefoni",x.phone?`<span class="mono">${esc(x.phone)}</span>${copyBtn(x.phone)}`:""),fact("Email",x.email?`${esc(x.email)}${copyBtn(x.email)}`:"")])+notesBlock(x);
@@ -1834,6 +1837,7 @@ document.addEventListener("click",async e=>{
   if(a==="capics"){capIcs();return}
   if(a==="tics"){const it=S.items.get(el.dataset.id);if(it&&it.due)taskIcs(it);return}
   if(a==="xlsx"){runXlsx();return}
+  if(a==="pushon"){pushEnable();return}
   if(a==="open"){const it=S.items.get(el.dataset.id);if(it)openWin(it.type==="lot"?specLot(it.id):specItem(it.id));return}
   if(a==="lot"){openWin(specLot(el.dataset.id));return}
   if(a==="sup"){openWin(specSup(el.dataset.pid,el.dataset.id));return}
@@ -2114,10 +2118,19 @@ document.addEventListener("input",e=>{if(e.target&&e.target.id==="gq"){SRCH.q=e.
 
 /* ---- kalendari i telefonit (.ics) ---- */
 function icsEsc(s){return String(s||"").replace(/\\/g,"\\\\").replace(/\n/g,"\\n").replace(/([,;])/g,"\\$1")}
+function icsUTC(d){return d.toISOString().replace(/[-:]/g,"").replace(/\.\d+Z$/,"Z")}
 function icsText(evs){
-  const st=new Date().toISOString().replace(/[-:]/g,"").replace(/\.\d+Z$/,"Z");
+  const st=icsUTC(new Date());
   const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Plani Im//SQ","CALSCALE:GREGORIAN","METHOD:PUBLISH"];
-  evs.forEach(e=>{L.push("BEGIN:VEVENT",`UID:${e.uid}@plani-im`,`DTSTAMP:${st}`,`DTSTART;VALUE=DATE:${e.from.replace(/-/g,"")}`,`DTEND;VALUE=DATE:${addD(e.to||e.from,1).replace(/-/g,"")}`,`SUMMARY:${icsEsc(e.title)}`,`DESCRIPTION:${icsEsc(e.desc||"")}`,"TRANSP:TRANSPARENT","BEGIN:VALARM","TRIGGER:-P1D","ACTION:DISPLAY",`DESCRIPTION:${icsEsc(e.title)}`,"END:VALARM","END:VEVENT")});
+  const alarm=(tr,t)=>["BEGIN:VALARM",`TRIGGER:${tr}`,"ACTION:DISPLAY",`DESCRIPTION:${icsEsc(t)}`,"END:VALARM"];
+  evs.forEach(e=>{
+    L.push("BEGIN:VEVENT",`UID:${e.uid}@plani-im`,`DTSTAMP:${st}`);
+    if(e.time&&/^\d{1,2}:\d{2}$/.test(e.time)){const a=new Date(`${e.from}T${e.time.padStart(5,"0")}:00`),b=new Date(a.getTime()+30*6e4);L.push(`DTSTART:${icsUTC(a)}`,`DTEND:${icsUTC(b)}`,"TRANSP:OPAQUE")}
+    else L.push(`DTSTART;VALUE=DATE:${e.from.replace(/-/g,"")}`,`DTEND;VALUE=DATE:${addD(e.to||e.from,1).replace(/-/g,"")}`,"TRANSP:TRANSPARENT");
+    L.push(`SUMMARY:${icsEsc(e.title)}`,`DESCRIPTION:${icsEsc(e.desc||"")}`,...alarm("-P1D",e.title));
+    if(e.time)L.push(...alarm("-PT10M",e.title));
+    L.push("END:VEVENT");
+  });
   L.push("END:VCALENDAR");return L.join("\r\n")+"\r\n";
 }
 function icsDownload(name,evs){
@@ -2153,7 +2166,7 @@ async function runXlsx(){
 }
 Object.assign(I18N.d,{"Sot":"Aujourd'hui","Kantieret":"Chantiers","Kërko":"Rechercher","Material":"Matériau","Dokument":"Document","për sot":"pour aujourd'hui","këtë javë":"cette semaine","këtë muaj":"ce mois-ci","Këtë javë":"Cette semaine","7 ditët e ardhshme":"Les 7 prochains jours","Me përparësi, pa afat":"Prioritaires, sans échéance","Asnjë gjë për sot.":"Rien pour aujourd'hui.","Asnjë afat këtë javë.":"Aucune échéance cette semaine.","me vonesë":"en retard","me afat sot":"pour aujourd'hui","takime":"rendez-vous","Raportet":"Rapports","Nga Claude, automatikisht":"Par Claude, automatiquement","Raporti i sotëm":"Rapport du jour","Raporti javor":"Rapport hebdomadaire","Vjen çdo mëngjes në 06:47":"Arrive chaque matin à 06:47","Vjen çdo të diel në 18:43":"Arrive chaque dimanche à 18:43","Ende nuk ka raport.":"Pas encore de rapport.","Testi i javës":"Test de la semaine","Bëj testin":"Faire le test","Shiko":"Voir","pyetje":"questions","Rezultati":"Résultat","Punë":"Travail","Shkollë":"École","Pushim":"Repos","Ditë pune · MAI BATIM AZUR":"Jour de travail · MAI BATIM AZUR","Shkollë CAP · në distancë":"École CAP · à distance","Ditë pushimi":"Jour de repos","Jashtë kalendarit":"Hors calendrier","Shkolla":"École","pas":"dans","ditësh":"jours","nesër":"demain","Java e shkollës, deri më":"Semaine d'école, jusqu'au","orë shkollë":"h de formation","Kantieret e punës · MAI BATIM AZUR":"Chantiers de travail · MAI BATIM AZUR","Kantieret e punës":"Chantiers de travail","Të gjitha":"Tout voir","Projektet e mia":"Mes projets","Projekt i ri":"Nouveau projet","Asnjë kantier pune.":"Aucun chantier de travail.","pika të hapura":"points ouverts","detyra":"tâches","hapa":"étapes","e buxhetit":"du budget","Mbeten këtë muaj":"Reste ce mois-ci","Hape":"Ouvrir","Alternanca CAP":"Alternance CAP","Gjithë kalendari":"Tout le calendrier","Shkolla e kryer":"Formation réalisée","orë":"h","Shto javët e shkollës në kalendar":"Ajouter les semaines d'école au calendrier","Kalendari i alternancës nuk është ngarkuar ende.":"Le calendrier d'alternance n'est pas encore chargé.","Kalendari i alternancës":"Calendrier d'alternance","Javët e shkollës":"Semaines d'école","ditë shkollë":"jours d'école","Rregullat":"Règles","Pyetja":"Question","Përgjigjur":"Répondu","Saktë":"Correct","Gabim":"Faux","Shkëlqyeshëm!":"Excellent !","Mirë, vazhdo kështu.":"Bien, continue comme ça.","Rishiko temat e javës.":"Révise les thèmes de la semaine.","Testi tjetër vjen të dielën.":"Le prochain test arrive dimanche.","Testet e kaluara":"Tests précédents","Fillo nga e para":"Recommencer","Testi i parë vjen të dielën në 18:43.":"Le premier test arrive dimanche à 18:43.","Shkruaj të paktën 2 shkronja.":"Tapez au moins 2 lettres.","Asnjë rezultat.":"Aucun résultat.","rezultate":"résultats","shkruaj më shumë fjalë":"précisez la recherche","Kërko detyra, materiale, dokumente, kontakte…":"Rechercher tâches, matériaux, documents, contacts…","Në kalendar":"Au calendrier","Hape skedarin për ta shtuar në kalendar.":"Ouvrez le fichier pour l'ajouter au calendrier.","Shkarko në Excel":"Télécharger en Excel","Të gjitha të dhënat në një skedar Excel":"Toutes les données dans un fichier Excel","Po përgatitet skedari Excel…":"Préparation du fichier Excel…","Skedari Excel u shkarkua.":"Fichier Excel téléchargé.","Excel-i nuk u krijua. Provo përsëri.":"Le fichier Excel n'a pas été créé. Réessayez.","MAI BATIM AZUR · prek një kantier për listat, kërkesat dhe dokumentet.":"MAI BATIM AZUR · touchez un chantier pour ses listes, demandes et documents.","Shto kantier pune":"Ajouter un chantier","Kantier pune":"Chantier de travail","Kantier imi":"Mon chantier","Objektiv":"Objectif"});
 function quizSec(){return`<section class="card"><div class="card-h"><div><h2>Testi i javës</h2><div class="sub">Pyetje të reja çdo të diel</div></div></div>${quizCardHTML()}</section>`}
-function taskIcs(x){const p=S.projects.get(x.pid);icsDownload(`detyre-${x.due}.ics`,[{uid:"t-"+x.id,from:x.due,title:x.title,desc:[p?p.name:"",x.notes||""].filter(Boolean).join("\n")}])}
+function taskIcs(x){const p=S.projects.get(x.pid);icsDownload(`detyre-${x.due}.ics`,[{uid:"t-"+x.id,from:x.due,time:x.time||"",title:x.title,desc:[p?p.name:"",x.notes||""].filter(Boolean).join("\n")}])}
 function capIcs(){if(!CAPC.d)return;icsDownload("cap-shkolla.ics",CAPC.blocks.map(b=>({uid:"cap-"+b.from,from:b.from,to:b.to,title:"Shkollë CAP Électricien",desc:(CAPC.d.school||"")+" · "+b.days+" ditë"})))}
 async function quizAnswer(i,o){
   const q=S.quiz;if(!q||!Array.isArray(q.questions))return;
@@ -2167,7 +2180,66 @@ async function quizReset(){
   S.quiz=Object.assign({},q,upd);drawWin();render();
   try{await DB.doc("cap/quiz").update(upd)}catch(err){fail(err)}
 }
-Object.assign(I18N.d,{"Pyetje të reja çdo të diel":"Nouvelles questions chaque dimanche","Paratë":"Argent","Financat":"Finances"});
+Object.assign(I18N.d,{"Pyetje të reja çdo të diel":"Nouvelles questions chaque dimanche","Ora (njoftim 10 min para)":"Heure (rappel 10 min avant)","Paratë":"Argent","Financat":"Finances"});
+
+
+/* ---- njoftimet në telefon (Web Push) ---- */
+const PUSH={state:"?",busy:false,checked:0};
+const pushOK=()=>"serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window;
+function pushKey(b){const s=b.replace(/-/g,"+").replace(/_/g,"/"),bin=atob(s+"===".slice((s.length+3)%4));return Uint8Array.from(bin,c=>c.charCodeAt(0))}
+async function pushSave(sub,force){
+  const j=sub.toJSON();let last="";try{last=localStorage.getItem("pi_push_ep")||""}catch(_){}
+  if(!force&&last===j.endpoint)return;
+  const {error}=await SB.from("pi_push_subs").upsert({endpoint:j.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth,ua:navigator.userAgent.slice(0,180)},{onConflict:"endpoint"});
+  if(error)throw error;
+  try{localStorage.setItem("pi_push_ep",j.endpoint)}catch(_){}
+}
+async function pushRefresh(){
+  if(!pushOK()){PUSH.state="na";return}
+  if(Notification.permission==="denied"){PUSH.state="denied";return}
+  try{
+    const reg=await navigator.serviceWorker.getRegistration();
+    const sub=reg&&await reg.pushManager.getSubscription();
+    if(sub&&Notification.permission==="granted"){PUSH.state="on";await pushSave(sub,false)}else PUSH.state="off";
+  }catch(e){console.warn(e);if(PUSH.state==="?")PUSH.state="off"}
+}
+async function pushEnable(){
+  if(PUSH.busy)return;
+  if(!pushOK()){toast("Ky shfletues nuk i mbështet njoftimet. Hape Plani Im nga Chrome.");return}
+  PUSH.busy=true;toastStay("Po aktivizohen njoftimet…");
+  try{
+    const perm=await Notification.requestPermission();
+    if(perm!=="granted"){PUSH.state=perm==="denied"?"denied":"off";toast("Njoftimet nuk u lejuan.");return}
+    const {data:key,error}=await SB.rpc("pi_push_pubkey");
+    if(error||!key)throw error||new Error("no key");
+    const reg=await navigator.serviceWorker.ready;
+    let sub=await reg.pushManager.getSubscription();
+    if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:pushKey(key)});
+    await pushSave(sub,true);
+    PUSH.state="on";toast("Njoftimet u aktivizuan ✓ Brenda pak minutash vjen një njoftim prove.");
+  }catch(e){console.warn(e);toast("Njoftimet nuk u aktivizuan. Provo përsëri.")}
+  finally{PUSH.busy=false;render();drawWin()}
+}
+function pushRow(){
+  const st=PUSH.state,R=(ic,t,m,act)=>`<div class="row" ${act?`data-act="${act}" role="button" tabindex="0"`:""}><span class="ic ${ic}">${ico("bell")}</span><div><div class="t">${t}</div><div class="m">${m}</div></div></div>`;
+  if(st==="on")return R("ok","Njoftimet në telefon: aktive ✓","1 ditë dhe 10 minuta para çdo afati, porosie dhe takimi");
+  if(st==="na")return R("mute","Njoftimet në telefon","Ky shfletues nuk i mbështet. Hape Plani Im nga Chrome dhe instaloje.");
+  if(st==="denied")return R("bad","Njoftimet janë bllokuar","Chrome → ⋮ → Informacioni i faqes → Njoftimet → Lejo. Pastaj rifresko.");
+  return R("warn","Aktivizo njoftimet në telefon","Njoftim 1 ditë dhe 10 minuta para çdo afati","pushon");
+}
+function pushBanner(){
+  if(PUSH.state!=="off")return"";
+  return`<div class="inst"><span class="ic warn" style="width:38px;height:38px">${ico("bell")}</span><div class="t">Aktivizo njoftimet<span>1 ditë dhe 10 minuta para çdo afati.</span></div><button type="button" class="btn pri" data-act="pushon">Aktivizo</button></div>`;
+}
+function deepLink(){
+  const h=decodeURIComponent(location.hash.slice(1));
+  if(!h.startsWith("i:")||S.mode!=="ready")return;
+  const id=h.slice(2),it=S.items.get(id);
+  try{history.replaceState(null,"","#"+(it&&it.pid?it.pid:"home"))}catch(_){}
+  render();
+  if(it)openWin(it.type==="lot"?specLot(id):specItem(id));
+}
+Object.assign(I18N.d,{"Njoftimet në telefon: aktive ✓":"Notifications sur le téléphone : actives ✓","1 ditë dhe 10 minuta para çdo afati, porosie dhe takimi":"1 jour et 10 minutes avant chaque échéance, commande et rendez-vous","Njoftimet në telefon":"Notifications sur le téléphone","Ky shfletues nuk i mbështet. Hape Plani Im nga Chrome dhe instaloje.":"Ce navigateur ne les prend pas en charge. Ouvrez Plani Im dans Chrome et installez-le.","Njoftimet janë bllokuar":"Notifications bloquées","Chrome → ⋮ → Informacioni i faqes → Njoftimet → Lejo. Pastaj rifresko.":"Chrome → ⋮ → Infos sur le site → Notifications → Autoriser. Puis actualisez.","Aktivizo njoftimet në telefon":"Activer les notifications","Njoftim 1 ditë dhe 10 minuta para çdo afati":"Rappel 1 jour et 10 minutes avant chaque échéance","Aktivizo njoftimet":"Activer les notifications","1 ditë dhe 10 minuta para çdo afati.":"1 jour et 10 minutes avant chaque échéance.","Aktivizo":"Activer","Po aktivizohen njoftimet…":"Activation des notifications…","Njoftimet nuk u lejuan.":"Notifications refusées.","Njoftimet u aktivizuan ✓ Brenda pak minutash vjen një njoftim prove.":"Notifications activées ✓ Une notification de test arrive dans quelques minutes.","Njoftimet nuk u aktivizuan. Provo përsëri.":"Les notifications n'ont pas été activées. Réessayez.","Ky shfletues nuk i mbështet njoftimet. Hape Plani Im nga Chrome.":"Ce navigateur ne prend pas en charge les notifications. Ouvrez Plani Im dans Chrome."});
 
 boot();
 })();
