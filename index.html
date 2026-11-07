@@ -1110,6 +1110,7 @@ async function aiCall(action,body){
   return r.json();
 }
 
+window.aiSend=aiSend;window.aiAnalyze=aiAnalyze;window.aiAction=aiAction;
 async function aiSend(){
   const inp=document.getElementById("ai-inp");
   if(!inp)return;
@@ -1122,7 +1123,7 @@ async function aiSend(){
   renderAiMsgs();
   try{
     const res=await aiCall("chat",{message:msg});
-    AI.msgs.push({role:"bot",text:res.reply||"(pa përgjigje)"});
+    AI.msgs.push({role:"bot",text:res.answer||res.reply||"(pa përgjigje)"});
   }catch(e){
     AI.msgs.push({role:"bot",text:"Gabim: "+e.message,err:true});
   }
